@@ -1,0 +1,49 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Role {
+  id           String     @id @default(cuid())
+  name         String
+  description  String?
+  category     String?
+  defaultNotes String?
+  teamRoles    TeamRole[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Team {
+  id        String     @id @default(cuid())
+  name      String
+  units     String[]
+  areas     String[]
+  supplies  Supply[]
+  teamRoles TeamRole[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Supply {
+  id       String @id @default(cuid())
+  item     String
+  quantity Int
+  teamId   String
+  team     Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}
+
+model TeamRole {
+  id     String  @id @default(cuid())
+  teamId String
+  roleId String
+  notes  String?
+  team   Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  role   Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, roleId])
+}
